@@ -77,6 +77,7 @@ namespace MyNotifications
 
             if (await NotificationUtils.RegisterBackgroundProcess())
             {
+                await Requests.Post("http://localhost:80/?state", "{\"state\": \"launched\"}");
                 NotificationUtils.SyncNotifications();
             }
         }
@@ -98,16 +99,19 @@ namespace MyNotifications
         /// </summary>
         /// <param name="sender">Die Quelle der Anhalteanforderung.</param>
         /// <param name="e">Details zur Anhalteanforderung.</param>
-        private void OnSuspending(object sender, SuspendingEventArgs e)
+        private async void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Anwendungszustand speichern und alle Hintergrundaktivitäten beenden
+            await Requests.Post("http://localhost:80/?state", "{\"state\": \"suspended\"}");
             deferral.Complete();
         }
 
-        protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)
+        protected override async void OnBackgroundActivated(BackgroundActivatedEventArgs args)
         {
             var deferral = args.TaskInstance.GetDeferral();
+
+            await Requests.Post("http://localhost:80/?state", "{\"state\": \"activatedfrombackground\"}");
 
             switch (args.TaskInstance.Task.Name)
             {
@@ -147,10 +151,11 @@ namespace MyNotifications
             WriteableBitmap appLogo = new WriteableBitmap(8, 8);
             try
             {
-                RandomAccessStreamReference appLogoStream = notification.AppInfo.DisplayInfo.GetLogo(new Size(8, 8));
-                await appLogo.SetSourceAsync(await appLogoStream.OpenReadAsync());
+                var appLogoStream = notification.AppInfo.DisplayInfo.GetLogo(new Size(8, 8));
+                var stream = await appLogoStream.OpenReadAsync();
+                await appLogo.SetSourceAsync(stream);
             }
-            catch
+            catch (NullReferenceException)
             {
                 Debug.WriteLine("Error getting BitmapImage!");
             }
@@ -182,9 +187,39 @@ namespace MyNotifications
         {
             return JsonConvert.SerializeObject(this, Formatting.Indented);
         }
+    }
 
-        public async void PostToUrl(string url = "http://localhost:80")
+    public class Requests
+    {
+        public static async Task<bool> Delete(string url)
         {
+            Debug.WriteLine("[Delete] " + url);
+            try
+            {
+                HttpClient httpClient = new HttpClient();
+                Uri uri = new Uri(url);
+
+                HttpResponseMessage httpResponseMessage = await httpClient.DeleteAsync(
+                    uri);
+
+                // Make sure the post succeeded, and write out the response.
+                httpResponseMessage.EnsureSuccessStatusCode();
+                var httpResponseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+
+                Debug.WriteLine("Request suceeded: "+httpResponseBody);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Request failed:");
+                Debug.WriteLine(ex);
+                return false;
+            }
+        }
+
+        public static async Task<bool> Post(string url, string json)
+        {
+            Debug.WriteLine("[Post] " + url);
             try
             {
                 HttpClient httpClient = new HttpClient();
@@ -192,7 +227,7 @@ namespace MyNotifications
 
                 // Construct the JSON to post.
                 HttpStringContent content = new HttpStringContent(
-                    this.ToJson(),
+                    json,
                     UnicodeEncoding.Utf8,
                     "application/json");
 
@@ -205,12 +240,14 @@ namespace MyNotifications
                 httpResponseMessage.EnsureSuccessStatusCode();
                 var httpResponseBody = await httpResponseMessage.Content.ReadAsStringAsync();
 
-                Debug.WriteLine(httpResponseBody);
+                Debug.WriteLine("Request suceeded: " + httpResponseBody);
+                return true;
             }
             catch (Exception ex)
             {
-                // Write out any exceptions.
+                Debug.WriteLine("Request failed:");
                 Debug.WriteLine(ex);
+                return false;
             }
         }
     }
@@ -224,14 +261,13 @@ namespace MyNotifications
             currentNotificationIds.Add(notification.Id);
 
             MyNotification notif = await MyNotification.FromUserNotification(notification);
-            Debug.WriteLine(notif.ToJson());
-            notif.PostToUrl("http://localhost:80");
+            Requests.Post("http://localhost:80/", notif.ToJson());
         }
 
         private static void RemoveNotification(uint notificationId)
         {
-            Debug.WriteLine("[Delete] " + notificationId.ToString());
             currentNotificationIds.Remove(notificationId);
+            Requests.Delete("http://localhost:80/"+notificationId.ToString());
         }
 
         public static async void SyncNotifications()
@@ -259,9 +295,10 @@ namespace MyNotifications
             }
         }
 
-        public static void ResetNotifications()
+        public static void ClearNotifications()
         {
             currentNotificationIds.Clear();
+            Requests.Post("http://localhost:80/?clear", "{\"clear\": true}");
             SyncNotifications();
         }
 

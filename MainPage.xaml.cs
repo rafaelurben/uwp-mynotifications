@@ -30,7 +30,7 @@ namespace MyNotifications
 
         private async void Button_ResetNotifications(object sender, RoutedEventArgs e)
         {
-            NotificationUtils.ResetNotifications();
+            NotificationUtils.ClearNotifications();
         }
 
         private void Button_TTS(object sender, RoutedEventArgs e)
