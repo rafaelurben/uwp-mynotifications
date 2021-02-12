@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -15,6 +16,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
+
 
 namespace MyNotifications
 {
@@ -121,12 +123,12 @@ namespace MyNotifications
     [Serializable]
     public class MyNotification
     {
-        private uint id;
-        private string appName;
-        private BitmapImage appLogo;
+        public readonly uint id;
+        public readonly string appName;
+        public readonly BitmapImage appLogo;
 
-        private string title;
-        private string description;
+        public readonly string title;
+        public readonly string description;
 
         public MyNotification(uint id, string appName, BitmapImage appLogo, string title = "", string description = "")
         {
@@ -143,8 +145,14 @@ namespace MyNotifications
 
             // Get the app's logo
             BitmapImage appLogo = new BitmapImage();
-            RandomAccessStreamReference appLogoStream = notification.AppInfo.DisplayInfo.GetLogo(new Size(8, 8));
-            await appLogo.SetSourceAsync(await appLogoStream.OpenReadAsync());
+            try
+            {
+                RandomAccessStreamReference appLogoStream = notification.AppInfo.DisplayInfo.GetLogo(new Size(8, 8));
+                await appLogo.SetSourceAsync(await appLogoStream.OpenReadAsync());
+            } catch
+            {
+                Debug.WriteLine("Error getting BitmapImage!");
+            }
 
             // Get the toast binding, if present
             NotificationBinding toastBinding = notification.Notification.Visual.GetBinding(KnownNotificationBindings.ToastGeneric);
@@ -168,6 +176,11 @@ namespace MyNotifications
         {
             return $"[{id} by {appName}] {title}: {description}";
         }
+
+        public string ToJson()
+        {
+            return JsonConvert.SerializeObject(this, Formatting.Indented);
+        }
     }
 
     public static class NotificationUtils
@@ -179,7 +192,7 @@ namespace MyNotifications
             currentNotificationIds.Add(notification.Id);
 
             MyNotification notif = await MyNotification.FromUserNotification(notification);
-            Debug.WriteLine(notif.ToString());
+            Debug.WriteLine(notif.ToJson());
         }
 
         private static void RemoveNotification(uint notificationId)
