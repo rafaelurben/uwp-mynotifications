@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Background;
 using Windows.Foundation;
 using Windows.Media.SpeechSynthesis;
+using Windows.Storage.Streams;
 using Windows.UI.Notifications;
 using Windows.UI.Notifications.Management;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Navigation;
-using System.Threading.Tasks;
 using Windows.UI.Xaml.Media.Imaging;
-using Windows.Storage.Streams;
+using Windows.UI.Xaml.Navigation;
 
 namespace MyNotifications
 {
@@ -128,7 +128,7 @@ namespace MyNotifications
         private string title;
         private string description;
 
-        public MyNotification(uint id, string appName, BitmapImage appLogo, string title="", string description = "")
+        public MyNotification(uint id, string appName, BitmapImage appLogo, string title = "", string description = "")
         {
             this.id = id;
             this.appName = appName;
@@ -207,7 +207,7 @@ namespace MyNotifications
                 }
             }
 
-  
+
             foreach (uint id in toBeRemoved)
             {
                 RemoveNotification(id);
@@ -299,7 +299,7 @@ namespace MyNotifications
 
     public class TTSUtils
     {
-        public static async void TTS(string text, string lang="en")
+        public static async void TTS(string text, string lang = "en")
         {
 
             MediaElement mediaElement = new MediaElement();
