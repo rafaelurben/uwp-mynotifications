@@ -17,7 +17,6 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
-
 namespace MyNotifications
 {
     /// <summary>
@@ -86,7 +85,7 @@ namespace MyNotifications
         /// </summary>
         /// <param name="sender">Der Rahmen, bei dem die Navigation fehlgeschlagen ist</param>
         /// <param name="e">Details über den Navigationsfehler</param>
-        void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
+        private void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
         {
             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
         }
@@ -149,7 +148,8 @@ namespace MyNotifications
             {
                 RandomAccessStreamReference appLogoStream = notification.AppInfo.DisplayInfo.GetLogo(new Size(8, 8));
                 await appLogo.SetSourceAsync(await appLogoStream.OpenReadAsync());
-            } catch
+            }
+            catch
             {
                 Debug.WriteLine("Error getting BitmapImage!");
             }
@@ -220,7 +220,6 @@ namespace MyNotifications
                 }
             }
 
-
             foreach (uint id in toBeRemoved)
             {
                 RemoveNotification(id);
@@ -275,12 +274,15 @@ namespace MyNotifications
                 case BackgroundAccessStatus.DeniedBySystemPolicy:
                     Debug.WriteLine("Background Access DENIED by SystemPolicy!");
                     return false;
+
                 case BackgroundAccessStatus.DeniedByUser:
                     Debug.WriteLine("Background Access DENIED by User!");
                     return false;
+
                 case BackgroundAccessStatus.Unspecified:
                     Debug.WriteLine("Background Access Unspecified!");
                     return false;
+
                 default:
                     Debug.WriteLine("Background Access ALLOWED: " + accessStatus.ToString());
                     return true;
@@ -297,12 +299,15 @@ namespace MyNotifications
                 case UserNotificationListenerAccessStatus.Allowed:
                     Debug.WriteLine("Notification Access ALLOWED!");
                     return true;
+
                 case UserNotificationListenerAccessStatus.Denied:
                     Debug.WriteLine("Notification Access DENIED!");
                     return false;
+
                 case UserNotificationListenerAccessStatus.Unspecified:
                     Debug.WriteLine("Notification Access UNSPECIFIED!");
                     return false;
+
                 default:
                     Debug.WriteLine("This shouldn't be happening!");
                     return false;
@@ -314,7 +319,6 @@ namespace MyNotifications
     {
         public static async void TTS(string text, string lang = "en")
         {
-
             MediaElement mediaElement = new MediaElement();
             var synth = new SpeechSynthesizer();
 
