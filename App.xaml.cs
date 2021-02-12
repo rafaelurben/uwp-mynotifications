@@ -16,6 +16,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
+using Windows.Web.Http;
 
 namespace MyNotifications
 {
@@ -124,12 +125,12 @@ namespace MyNotifications
     {
         public readonly uint id;
         public readonly string appName;
-        public readonly BitmapImage appLogo;
+        public readonly WriteableBitmap appLogo;
 
         public readonly string title;
         public readonly string description;
 
-        public MyNotification(uint id, string appName, BitmapImage appLogo, string title = "", string description = "")
+        public MyNotification(uint id, string appName, WriteableBitmap appLogo, string title = "", string description = "")
         {
             this.id = id;
             this.appName = appName;
@@ -143,7 +144,7 @@ namespace MyNotifications
             string appName = notification.AppInfo.DisplayInfo.DisplayName;
 
             // Get the app's logo
-            BitmapImage appLogo = new BitmapImage();
+            WriteableBitmap appLogo = new WriteableBitmap(8, 8);
             try
             {
                 RandomAccessStreamReference appLogoStream = notification.AppInfo.DisplayInfo.GetLogo(new Size(8, 8));
@@ -181,6 +182,37 @@ namespace MyNotifications
         {
             return JsonConvert.SerializeObject(this, Formatting.Indented);
         }
+
+        public async void PostToUrl(string url = "http://localhost:80")
+        {
+            try
+            {
+                HttpClient httpClient = new HttpClient();
+                Uri uri = new Uri(url);
+
+                // Construct the JSON to post.
+                HttpStringContent content = new HttpStringContent(
+                    this.ToJson(),
+                    UnicodeEncoding.Utf8,
+                    "application/json");
+
+                // Post the JSON and wait for a response.
+                HttpResponseMessage httpResponseMessage = await httpClient.PostAsync(
+                    uri,
+                    content);
+
+                // Make sure the post succeeded, and write out the response.
+                httpResponseMessage.EnsureSuccessStatusCode();
+                var httpResponseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+
+                Debug.WriteLine(httpResponseBody);
+            }
+            catch (Exception ex)
+            {
+                // Write out any exceptions.
+                Debug.WriteLine(ex);
+            }
+        }
     }
 
     public static class NotificationUtils
@@ -193,6 +225,7 @@ namespace MyNotifications
 
             MyNotification notif = await MyNotification.FromUserNotification(notification);
             Debug.WriteLine(notif.ToJson());
+            notif.PostToUrl();
         }
 
         private static void RemoveNotification(uint notificationId)
