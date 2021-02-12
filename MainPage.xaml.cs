@@ -28,10 +28,9 @@ namespace MyNotifications
             }
         }
 
-        private async void Button_NotificationAccess(object sender, RoutedEventArgs e)
+        private async void Button_ResetNotifications(object sender, RoutedEventArgs e)
         {
-            await NotificationUtils.GetBackgroundPermission();
-            await NotificationUtils.GetNotificationPermission();
+            NotificationUtils.ResetNotifications();
         }
 
         private void Button_TTS(object sender, RoutedEventArgs e)

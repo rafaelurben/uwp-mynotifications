@@ -225,7 +225,7 @@ namespace MyNotifications
 
             MyNotification notif = await MyNotification.FromUserNotification(notification);
             Debug.WriteLine(notif.ToJson());
-            notif.PostToUrl();
+            notif.PostToUrl("http://localhost:80");
         }
 
         private static void RemoveNotification(uint notificationId)
@@ -257,6 +257,12 @@ namespace MyNotifications
             {
                 RemoveNotification(id);
             }
+        }
+
+        public static void ResetNotifications()
+        {
+            currentNotificationIds.Clear();
+            SyncNotifications();
         }
 
         public static async Task<bool> RegisterBackgroundProcess()

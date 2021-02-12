@@ -10,6 +10,6 @@
 
     <Grid>
         <Button Content="Test TTS" HorizontalAlignment="Center" Click="Button_TTS"/>
-        <Button Content="Notification Access" HorizontalAlignment="Center" Click="Button_NotificationAccess" Margin="0,530,0,0" VerticalAlignment="Top"/>
+        <Button Content="Reset Notifications" HorizontalAlignment="Center" Click="Button_ResetNotifications" VerticalAlignment="Top"/>
     </Grid>
 </Page>
