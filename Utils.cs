@@ -12,6 +12,25 @@ namespace MyNotifications
 {
     public static class Requests
     {
+        private static async void ShowError()
+        {
+            try
+            {
+                ContentDialog dialog = new ContentDialog
+                {
+                    Title = "Request failed",
+                    Content = "The API endpoint could not be reached or another error occured!",
+                    CloseButtonText = "Close"
+                };
+
+                ContentDialogResult result = await dialog.ShowAsync();
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
         public static async Task<bool> Delete(string url)
         {
             Debug.WriteLine("[Delete] " + url);
@@ -34,6 +53,9 @@ namespace MyNotifications
             {
                 Debug.WriteLine("Request failed:");
                 Debug.WriteLine(ex);
+
+                ShowError();
+
                 return false;
             }
         }
@@ -68,6 +90,9 @@ namespace MyNotifications
             {
                 Debug.WriteLine("Request failed:");
                 Debug.WriteLine(ex);
+
+                ShowError();
+
                 return false;
             }
         }
