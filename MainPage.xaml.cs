@@ -30,12 +30,13 @@ namespace MyNotifications
 
         private async void Button_ResetNotifications(object sender, RoutedEventArgs e)
         {
-            NotificationUtils.ClearNotifications();
+            await NotificationUtils.ClearNotifications();
+            await NotificationUtils.SyncNotifications();
         }
 
         private void Button_TTS(object sender, RoutedEventArgs e)
         {
-            TTSUtils.TTS("Hello world! This is just a test!", "en");
+            TTS.Say("Hello world! This is just a test!", "en");
         }
     }
 }
