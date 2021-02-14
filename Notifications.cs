@@ -80,20 +80,24 @@ namespace MyNotifications
 
     public static class NotificationUtils
     {
-        private static List<uint> currentNotificationIds = new List<uint>();
+        public static readonly string DEFAULT_APIURL = "http://localhost:80/notifications";
+        public static List<uint> currentNotificationIds = new List<uint>();
 
         private static async Task<bool> AddNotification(UserNotification notification)
         {
             currentNotificationIds.Add(notification.Id);
             MyNotification notif = await MyNotification.FromUserNotification(notification);
-            bool success = await Requests.Post("http://localhost:80/", notif.ToJson());
+            string content = notif.ToJson();
+            string url = ((string)Settings.Get("APIURL", DEFAULT_APIURL)) + "?mode=add";
+            bool success = await Requests.Post(url, content);
             return success;
         }
 
         private static async Task<bool> RemoveNotification(uint notificationId)
         {
             currentNotificationIds.Remove(notificationId);
-            bool success = await Requests.Delete("http://localhost:80/" + notificationId.ToString());
+            string url = ((string)Settings.Get("APIURL", DEFAULT_APIURL)) + "?mode=delete&id=" + notificationId.ToString();
+            bool success = await Requests.Delete(url);
             return success;
         }
 
@@ -124,11 +128,13 @@ namespace MyNotifications
             return;
         }
 
-        public static async Task ClearNotifications()
+        public static async Task<bool> ClearNotifications()
         {
             currentNotificationIds.Clear();
-            _ = await Requests.Post("http://localhost:80/?clear", "{\"clear\": true}");
-            return;
+            string url = ((string)Settings.Get("APIURL", DEFAULT_APIURL)) + "?mode=clear";
+            string content = "{\"clear\": true}";
+            bool success = await Requests.Post(url, content);
+            return success;
         }
 
         public static async Task<bool> RegisterBackgroundProcess()

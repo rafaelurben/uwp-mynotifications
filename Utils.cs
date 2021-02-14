@@ -27,7 +27,7 @@ namespace MyNotifications
                 httpResponseMessage.EnsureSuccessStatusCode();
                 var httpResponseBody = await httpResponseMessage.Content.ReadAsStringAsync();
 
-                Debug.WriteLine("Request suceeded: "+httpResponseBody);
+                Debug.WriteLine("Request suceeded: " + httpResponseBody);
                 return true;
             }
             catch (Exception ex)
@@ -75,15 +75,18 @@ namespace MyNotifications
 
     public static class Settings
     {
-        static readonly ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+        private static readonly ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
 
-        public static object Get(string id)
+        public static object Get(string id, object defaultvalue = null)
         {
-            return localSettings.Values[id];
+            object value = localSettings.Values[id];
+            return value is null ? defaultvalue : value;
         }
 
         public static void Set(string id, object value)
         {
+            Debug.WriteLine("[Save] '" + id + "':");
+            Debug.WriteLine(value);
             localSettings.Values[id] = value;
         }
     }

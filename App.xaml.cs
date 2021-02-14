@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
-using Windows.ApplicationModel.Background;
-using Windows.UI.Notifications;
-using Windows.UI.Notifications.Management;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -59,8 +52,8 @@ namespace MyNotifications
 
             if (await NotificationUtils.RegisterBackgroundProcess())
             {
-                await Requests.Post("http://localhost:80/?state", "{\"state\": \"launched\"}");
-                NotificationUtils.SyncNotifications();
+                await Requests.Post("http://localhost:80/log", "{\"state\": \"launched\"}");
+                await NotificationUtils.SyncNotifications();
             }
         }
 
@@ -73,7 +66,7 @@ namespace MyNotifications
         {
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Anwendungszustand speichern und alle Hintergrundaktivitäten beenden
-            await Requests.Post("http://localhost:80/?state", "{\"state\": \"suspended\"}");
+            await Requests.Post("http://localhost:80/log", "{\"state\": \"suspended\"}");
             deferral.Complete();
         }
 
@@ -84,8 +77,8 @@ namespace MyNotifications
             switch (args.TaskInstance.Task.Name)
             {
                 case "UserNotificationChanged":
-                    await Requests.Post("http://localhost:80/?state", "{\"state\": \"activatedfrombackground\"}");
-                    NotificationUtils.SyncNotifications();
+                    await Requests.Post("http://localhost:80/log", "{\"state\": \"activatedfrombackground\"}");
+                    await NotificationUtils.SyncNotifications();
                     break;
             }
 

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using Windows.Foundation.Metadata;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -26,17 +27,42 @@ namespace MyNotifications
                 // Older version of Windows, no Listener
                 Debug.WriteLine("Listener not Supported!");
             }
+
+            LoadSettings();
         }
 
         private async void Button_ResetNotifications(object sender, RoutedEventArgs e)
         {
             await NotificationUtils.ClearNotifications();
             await NotificationUtils.SyncNotifications();
+
+            ContentDialog dialog = new ContentDialog
+            {
+                Title = "Reset done",
+                Content = "Your notifications have been resent to the api!",
+                CloseButtonText = "Ok"
+            };
+
+            ContentDialogResult result = await dialog.ShowAsync();
         }
 
-        private void Button_TTS(object sender, RoutedEventArgs e)
+        private async void Button_SaveSettings(object sender, RoutedEventArgs e)
         {
-            TTS.Say("Hello world! This is just a test!", "en");
+            Settings.Set("APIURL", Input_APIURL.Text);
+
+            ContentDialog dialog = new ContentDialog
+            {
+                Title = "Settings saved",
+                Content = "Your settings have been saved!",
+                CloseButtonText = "Ok"
+            };
+
+            ContentDialogResult result = await dialog.ShowAsync();
+        }
+
+        private void LoadSettings()
+        {
+            Input_APIURL.Text = (string)Settings.Get("APIURL", NotificationUtils.DEFAULT_APIURL);
         }
     }
 }
