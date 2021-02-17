@@ -15,7 +15,8 @@
 
             <StackPanel Orientation="Horizontal">
                 <Button Margin="0,12" Content="Save" Click="Button_SaveSettings" ToolTipService.ToolTip="Save your settings"/>
-                <Button Margin="12" Content="Reset Notifications" Click="Button_ResetNotifications" ToolTipService.ToolTip="Resend all notifications to the api url"/>
+                <Button Margin="12,0" Content="Check Connection" Click="Button_CheckAPIConnection" ToolTipService.ToolTip="Check the connection to the API (Need to save first if url changed)"/>
+                <Button Margin="0,12" Content="Reset Notifications" Click="Button_ResetNotifications" ToolTipService.ToolTip="Resend all notifications to the API (Need to save first if url changed)"/>
             </StackPanel>
 
             <TextBlock Margin="0,30,0,15" Text="Information" Style="{StaticResource TitleTextBlockStyle}"/>

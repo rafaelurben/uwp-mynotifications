@@ -12,22 +12,58 @@ namespace MyNotifications
 {
     public static class Requests
     {
+        private static bool shown = false;
+
         private static async void ShowError()
         {
+            if (!shown)
+            {
+                try
+                {
+                    ContentDialog dialog = new ContentDialog
+                    {
+                        Title = "Request failed",
+                        Content = "The API endpoint could not be reached or another error occured!",
+                        CloseButtonText = "Close"
+                    };
+
+                    ContentDialogResult result = await dialog.ShowAsync();
+
+                    shown = true;
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+        }
+
+        public static async Task<string> Get(string url)
+        {
+            Debug.WriteLine("[Get] " + url);
             try
             {
-                ContentDialog dialog = new ContentDialog
-                {
-                    Title = "Request failed",
-                    Content = "The API endpoint could not be reached or another error occured!",
-                    CloseButtonText = "Close"
-                };
+                HttpClient httpClient = new HttpClient();
+                Uri uri = new Uri(url);
 
-                ContentDialogResult result = await dialog.ShowAsync();
+                HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(
+                    uri);
+
+                // Make sure the post succeeded, and write out the response.
+                httpResponseMessage.EnsureSuccessStatusCode();
+                var httpResponseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+
+                Debug.WriteLine("Request suceeded: " + httpResponseBody);
+                return httpResponseBody;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Debug.WriteLine("Request failed:");
+                Debug.WriteLine(ex);
 
+                ShowError();
+
+                return "ERROR";
             }
         }
 

@@ -83,6 +83,13 @@ namespace MyNotifications
         public static readonly string DEFAULT_APIURL = "http://localhost:80/notifications";
         public static List<uint> currentNotificationIds = new List<uint>();
 
+        public static async Task<bool> CheckAPIConnection()
+        {
+            string url = ((string)Settings.Get("APIURL", DEFAULT_APIURL)) + "?mode=test";
+            string content = await Requests.Get(url);
+            return (bool)(content != "ERROR");
+        }
+
         private static async Task<bool> AddNotification(UserNotification notification)
         {
             currentNotificationIds.Add(notification.Id);

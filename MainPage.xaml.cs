@@ -60,6 +60,27 @@ namespace MyNotifications
             ContentDialogResult result = await dialog.ShowAsync();
         }
 
+        private async void Button_CheckAPIConnection(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                bool success = await NotificationUtils.CheckAPIConnection();
+
+                ContentDialog dialog = new ContentDialog
+                {
+                    Title = success ? "Check succeeded!" : "Check failed!",
+                    Content = "API connection check finished.",
+                    CloseButtonText = "Close"
+                };
+
+                _ = await dialog.ShowAsync();
+            } 
+            catch
+            {
+
+            }
+        }
+
         private void LoadSettings()
         {
             Input_APIURL.Text = (string)Settings.Get("APIURL", NotificationUtils.DEFAULT_APIURL);
