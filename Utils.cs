@@ -58,8 +58,8 @@ namespace MyNotifications
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Request failed:");
-                Debug.WriteLine(ex);
+                Debug.WriteLine("Request failed!");
+                // Debug.WriteLine(ex);
 
                 ShowError();
 
@@ -87,8 +87,8 @@ namespace MyNotifications
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Request failed:");
-                Debug.WriteLine(ex);
+                Debug.WriteLine("Request failed!");
+                // Debug.WriteLine(ex);
 
                 ShowError();
 
@@ -124,8 +124,8 @@ namespace MyNotifications
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Request failed:");
-                Debug.WriteLine(ex);
+                Debug.WriteLine("Request failed!");
+                // Debug.WriteLine(ex);
 
                 ShowError();
 
