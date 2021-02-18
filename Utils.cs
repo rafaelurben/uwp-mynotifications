@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -56,10 +57,9 @@ namespace MyNotifications
                 Debug.WriteLine("Request suceeded: " + httpResponseBody);
                 return httpResponseBody;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Debug.WriteLine("Request failed!");
-                // Debug.WriteLine(ex);
 
                 ShowError();
 
@@ -85,10 +85,9 @@ namespace MyNotifications
                 Debug.WriteLine("Request suceeded: " + httpResponseBody);
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Debug.WriteLine("Request failed!");
-                // Debug.WriteLine(ex);
 
                 ShowError();
 
@@ -122,10 +121,9 @@ namespace MyNotifications
                 Debug.WriteLine("Request suceeded: " + httpResponseBody);
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Debug.WriteLine("Request failed!");
-                // Debug.WriteLine(ex);
 
                 ShowError();
 
@@ -149,6 +147,24 @@ namespace MyNotifications
             Debug.WriteLine("[Save] '" + id + "':");
             Debug.WriteLine(value);
             localSettings.Values[id] = value;
+        }
+
+        public static object GetSerialized(string id, object defaultvalue = null)
+        {
+            object obj = Get(id);
+            if (obj != null)
+            {
+                return JsonConvert.DeserializeObject((string) obj);
+            }
+            else
+            {
+                return defaultvalue;
+            }
+        }
+
+        public static void SetSerialized(string id, object value)
+        {
+            Set(id, JsonConvert.SerializeObject(value));
         }
     }
 
