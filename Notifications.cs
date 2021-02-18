@@ -81,18 +81,15 @@ namespace MyNotifications
     public static class NotificationUtils
     {
         public static readonly string DEFAULT_APIURL = "http://localhost:80/notifications";
-        public static List<uint> currentNotificationIds = new List<uint>();
 
-        public static async Task<bool> CheckAPIConnection()
+        private static List<uint> CurrentNotificationIds
         {
-            string url = ((string)Settings.Get("APIURL", DEFAULT_APIURL)) + "?mode=test";
-            string content = await Requests.Get(url);
-            return (bool)(content != "ERROR");
+            get { return ((Newtonsoft.Json.Linq.JArray) Settings.GetSerialized("CURRENTNOTIFICATIONIDS", new Newtonsoft.Json.Linq.JArray())).ToObject<List<uint>>(); }
+            set { Settings.SetSerialized("CURRENTNOTIFICATIONIDS", value); }
         }
 
         private static async Task<bool> AddNotification(UserNotification notification)
         {
-            currentNotificationIds.Add(notification.Id);
             MyNotification notif = await MyNotification.FromUserNotification(notification);
             string content = notif.ToJson();
             string url = ((string)Settings.Get("APIURL", DEFAULT_APIURL)) + "?mode=add";
@@ -102,47 +99,64 @@ namespace MyNotifications
 
         private static async Task<bool> RemoveNotification(uint notificationId)
         {
-            currentNotificationIds.Remove(notificationId);
             string url = ((string)Settings.Get("APIURL", DEFAULT_APIURL)) + "?mode=delete&id=" + notificationId.ToString();
             bool success = await Requests.Delete(url);
+            return success;
+        }
+        
+        public static async Task<bool> ClearNotifications()
+        {
+            CurrentNotificationIds = new List<uint>();
+
+            string url = ((string)Settings.Get("APIURL", DEFAULT_APIURL)) + "?mode=clear";
+            string content = "{\"clear\": true}";
+            bool success = await Requests.Post(url, content);
             return success;
         }
 
         public static async Task SyncNotifications()
         {
+            List<uint> notificationIds = CurrentNotificationIds;
+            List<uint> toBeRemoved = new List<uint>(notificationIds);
+
             UserNotificationListener listener = UserNotificationListener.Current;
 
             IReadOnlyList<UserNotification> userNotifications = await listener.GetNotificationsAsync(NotificationKinds.Toast);
-            var toBeRemoved = new List<uint>(currentNotificationIds);
 
             foreach (UserNotification userNotification in userNotifications)
             {
-                if (currentNotificationIds.Contains(userNotification.Id))
+                if (notificationIds.Contains(userNotification.Id))
                 {
                     toBeRemoved.Remove(userNotification.Id);
                 }
                 else
                 {
                     _ = AddNotification(userNotification);
+                    notificationIds.Add(userNotification.Id);
                 }
             }
 
             foreach (uint id in toBeRemoved)
             {
                 _ = RemoveNotification(id);
+                notificationIds.Remove(id);
             }
 
+            CurrentNotificationIds = notificationIds;
             return;
         }
 
-        public static async Task<bool> ClearNotifications()
+        // API Check
+
+        public static async Task<bool> CheckAPIConnection()
         {
-            currentNotificationIds.Clear();
-            string url = ((string)Settings.Get("APIURL", DEFAULT_APIURL)) + "?mode=clear";
-            string content = "{\"clear\": true}";
-            bool success = await Requests.Post(url, content);
-            return success;
+            string url = ((string)Settings.Get("APIURL", DEFAULT_APIURL)) + "?mode=test";
+            string content = await Requests.Get(url);
+            return (bool)(content != "ERROR");
         }
+
+
+        // Permissions & Background task
 
         public static async Task<bool> RegisterBackgroundProcess()
         {
