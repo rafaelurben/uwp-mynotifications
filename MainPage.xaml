@@ -11,7 +11,8 @@
     <ScrollViewer>
         <StackPanel Margin="25">
             <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}"/>
-            <TextBox Margin="0,24,0,12" Name="Input_APIURL" Header="API Url" ToolTipService.ToolTip="Change the url where the app posts data to"/>
+            <TextBox Margin="0,24,0,0" Name="Input_APIURL" Header="API Url" ToolTipService.ToolTip="Change the url where the app posts data to"/>
+            <TextBox Margin="0,24,0,12" Name="Input_BLOCKEDAPPIDS" Header="Blocked app ids" ToolTipService.ToolTip="One id per line; notifications from these apps won't be sent to the api" AcceptsReturn="True" />
 
             <StackPanel Orientation="Horizontal">
                 <Button Margin="0,12" Content="Save" Click="Button_SaveSettings" ToolTipService.ToolTip="Save your settings"/>

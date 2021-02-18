@@ -49,6 +49,7 @@ namespace MyNotifications
         private async void Button_SaveSettings(object sender, RoutedEventArgs e)
         {
             Settings.Set("APIURL", Input_APIURL.Text);
+            Settings.Set("BLOCKEDAPPIDS", Input_BLOCKEDAPPIDS.Text);
 
             ContentDialog dialog = new ContentDialog
             {
@@ -84,6 +85,7 @@ namespace MyNotifications
         private void LoadSettings()
         {
             Input_APIURL.Text = (string)Settings.Get("APIURL", NotificationUtils.DEFAULT_APIURL);
+            Input_BLOCKEDAPPIDS.Text = (string)Settings.Get("BLOCKEDAPPIDS", "");
         }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Background;
 using Windows.Foundation;
@@ -17,15 +18,18 @@ namespace MyNotifications
     public class MyNotification
     {
         public readonly uint id;
+
+        public readonly string appId;
         public readonly string appName;
         public readonly WriteableBitmap appLogo;
 
         public readonly string title;
         public readonly string description;
 
-        public MyNotification(uint id, string appName, WriteableBitmap appLogo, string title = "", string description = "")
+        public MyNotification(uint id, string appId, string appName, WriteableBitmap appLogo, string title = "", string description = "")
         {
             this.id = id;
+            this.appId = appId;
             this.appName = appName;
             this.appLogo = appLogo;
             this.title = title;
@@ -34,6 +38,7 @@ namespace MyNotifications
 
         public static async Task<MyNotification> FromUserNotification(UserNotification notification)
         {
+            string appId = notification.AppInfo.AppUserModelId;
             string appName = notification.AppInfo.DisplayInfo.DisplayName;
 
             // Get the app's logo
@@ -59,11 +64,11 @@ namespace MyNotifications
                 string title = textElements.FirstOrDefault()?.Text;
                 string description = string.Join("\n", textElements.Skip(1).Select(t => t.Text));
 
-                return new MyNotification(notification.Id, appName, appLogo, title, description);
+                return new MyNotification(notification.Id, appId, appName, appLogo, title, description);
             }
             else
             {
-                return new MyNotification(notification.Id, appName, appLogo);
+                return new MyNotification(notification.Id, appId, appName, appLogo);
             }
         }
 
@@ -118,6 +123,7 @@ namespace MyNotifications
         {
             List<uint> notificationIds = CurrentNotificationIds;
             List<uint> toBeRemoved = new List<uint>(notificationIds);
+            string[] blockedAppIds = Regex.Split((string)Settings.Get("BLOCKEDAPPIDS", ""), "\r\n|\r|\n");
 
             UserNotificationListener listener = UserNotificationListener.Current;
 
@@ -131,8 +137,11 @@ namespace MyNotifications
                 }
                 else
                 {
-                    _ = AddNotification(userNotification);
-                    notificationIds.Add(userNotification.Id);
+                    if (!blockedAppIds.Contains((string) userNotification.AppInfo.AppUserModelId))
+                    {
+                        _ = AddNotification(userNotification);
+                        notificationIds.Add(userNotification.Id);
+                    }
                 }
             }
 
